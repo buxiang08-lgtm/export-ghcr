@@ -12,6 +12,9 @@ on:
         required: true
         default: 'android-sdk-35'
 
+permissions:
+  contents: write
+
 jobs:
   export:
     runs-on: ubuntu-latest
@@ -28,9 +31,13 @@ jobs:
       - name: 查看文件大小
         run: ls -lh ${{ github.event.inputs.filename }}.tar
 
-      - name: 上传到 Artifacts
-        uses: actions/upload-artifact@v4
+      - name: 创建 Release 并上传
+        uses: softprops/action-gh-release@v2
         with:
+          tag_name: ${{ github.event.inputs.filename }}
           name: ${{ github.event.inputs.filename }}
-          path: ${{ github.event.inputs.filename }}.tar
-          retention-days: 3
+          body: |
+            自动导出的 Docker 镜像文件
+            - 镜像：`${{ github.event.inputs.image }}`
+            - 导出时间：${{ github.run_id }}
+          files: ${{ github.event.inputs.filename }}.tar
